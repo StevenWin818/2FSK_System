@@ -5,6 +5,25 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.2.1] - 2025-11-13
+
+### 修复
+- 🐛 **文件保存路径问题**：所有输出文件现在保存到脚本所在目录
+  - 之前：文件保存到MWORKS工作目录（父文件夹）
+  - 现在：使用 `@__DIR__` 获取脚本目录，文件保存到项目文件夹
+  - 影响文件：waveforms.png, ber_curve.png, spectrum.png, ber_data.csv, spectrum_data.csv
+
+- 🔧 **语法兼容性修复**：
+  - 移除 `const` 声明（MWORKS环境不支持局部const）
+  - 添加模块重复加载检查（避免WARNING）
+  - PyPlot函数显式导入为全局变量
+
+### 改进
+- 📁 输出文件路径现在显示完整绝对路径
+- ✅ 更好的MWORKS环境兼容性
+
+---
+
 ## [1.2.0] - 2025-11-13
 
 ### 新增
