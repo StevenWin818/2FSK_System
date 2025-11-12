@@ -19,6 +19,9 @@ using Statistics
 using FFTW
 
 # ==================== 系统参数设置 ====================
+# 获取脚本所在目录
+SCRIPT_DIR = @__DIR__
+
 MESSAGE = "测试624438"
 SYMBOL_RATE = 21e3
 F0 = 4 * SYMBOL_RATE
@@ -143,23 +146,25 @@ end
 println("\n[步骤 8] 保存数据...")
 try
     # 保存误码率数据
-    open("ber_data.csv", "w") do f
+    ber_path = joinpath(SCRIPT_DIR, "ber_data.csv")
+    open(ber_path, "w") do f
         println(f, "SNR_dB,Simulated_BER,Theoretical_BER")
         for (i, snr) in enumerate(snr_range)
             println(f, "$snr,$(ber_simulated[i]),$(ber_theoretical[i])")
         end
     end
-    println("  ✓ BER数据已保存: ber_data.csv")
+    println("  ✓ BER数据已保存: $ber_path")
     
     # 保存频谱数据（部分）
-    open("spectrum_data.csv", "w") do f
+    spectrum_path = joinpath(SCRIPT_DIR, "spectrum_data.csv")
+    open(spectrum_path, "w") do f
         println(f, "Frequency_kHz,Magnitude")
         step = max(1, length(positive_freqs) ÷ 1000)
         for i in 1:step:length(positive_freqs)
             println(f, "$(positive_freqs[i]/1000),$(magnitude[i])")
         end
     end
-    println("  ✓ 频谱数据已保存: spectrum_data.csv")
+    println("  ✓ 频谱数据已保存: $spectrum_path")
 catch e
     println("  ⚠ 保存数据时出错: $e")
 end

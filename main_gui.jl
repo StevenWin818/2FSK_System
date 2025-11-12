@@ -49,6 +49,9 @@ catch e
 end
 
 # ==================== 系统参数设置 ====================
+# 获取脚本所在目录
+SCRIPT_DIR = @__DIR__
+
 MESSAGE = "测试624438"
 SYMBOL_RATE = 21e3
 F0 = 4 * SYMBOL_RATE
@@ -158,8 +161,9 @@ if PLOTTING_AVAILABLE
         ylim(-0.5, 1.5)
         
         tight_layout()
-        savefig("waveforms.png", dpi=150, bbox_inches="tight")
-        println("  ✓ 波形图已保存: waveforms.png")
+        output_path = joinpath(SCRIPT_DIR, "waveforms.png")
+        savefig(output_path, dpi=150, bbox_inches="tight")
+        println("  ✓ 波形图已保存: $output_path")
         close()
     catch e
         println("  ⚠ 生成波形图时出错: $e")
@@ -214,8 +218,9 @@ if PLOTTING_AVAILABLE
         grid(true, which="both", alpha=0.3)
         ylim(1e-6, 1)
         
-        savefig("ber_curve.png", dpi=150, bbox_inches="tight")
-        println("  ✓ BER曲线已保存: ber_curve.png")
+        output_path = joinpath(SCRIPT_DIR, "ber_curve.png")
+        savefig(output_path, dpi=150, bbox_inches="tight")
+        println("  ✓ BER曲线已保存: $output_path")
         close()
     catch e
         println("  ⚠ 生成BER曲线时出错: $e")
@@ -263,12 +268,13 @@ if PLOTTING_AVAILABLE
         title("2FSK调制信号频谱", fontsize=14, fontproperties="SimHei", fontweight="bold")
         xlabel("频率 (kHz)", fontsize=12, fontproperties="SimHei")
         ylabel("幅度", fontsize=12, fontproperties="SimHei")
-        legend(loc="best", prop=Dict("family"=>"SimHei", "size"=>11))
+        legend(loc="best", prop=Dict(raw"family"=>"SimHei", "size"=>11))
         grid(true, alpha=0.3)
         xlim(0, freq_limit/1000)
         
-        savefig("spectrum.png", dpi=150, bbox_inches="tight")
-        println("  ✓ 频谱图已保存: spectrum.png")
+        output_path = joinpath(SCRIPT_DIR, "spectrum.png")
+        savefig(output_path, dpi=150, bbox_inches="tight")
+        println("  ✓ 频谱图已保存: $output_path")
         close()
     catch e
         println("  ⚠ 生成频谱图时出错: $e")
@@ -279,23 +285,25 @@ end
 println("\n[步骤 11] 保存数据...")
 try
     # 保存误码率数据
-    open("ber_data.csv", "w") do f
+    ber_path = joinpath(SCRIPT_DIR, "ber_data.csv")
+    open(ber_path, "w") do f
         println(f, "SNR_dB,Simulated_BER,Theoretical_BER")
         for (i, snr) in enumerate(snr_range)
             println(f, "$snr,$(ber_simulated[i]),$(ber_theoretical[i])")
         end
     end
-    println("  ✓ BER数据已保存: ber_data.csv")
+    println("  ✓ BER数据已保存: $ber_path")
     
     # 保存频谱数据（部分）
-    open("spectrum_data.csv", "w") do f
+    spectrum_path = joinpath(SCRIPT_DIR, "spectrum_data.csv")
+    open(spectrum_path, "w") do f
         println(f, "Frequency_kHz,Magnitude")
         step = max(1, length(positive_freqs) ÷ 1000)
         for i in 1:step:length(positive_freqs)
             println(f, "$(positive_freqs[i]/1000),$(magnitude[i])")
         end
     end
-    println("  ✓ 频谱数据已保存: spectrum_data.csv")
+    println("  ✓ 频谱数据已保存: $spectrum_path")
 catch e
     println("  ⚠ 保存数据时出错: $e")
 end
