@@ -1,6 +1,6 @@
 ﻿# 2FSK调制解调系统
 
-[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://github.com/yourusername/2FSK_System)
+[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://github.com/StevenWin818/2FSK_System)
 [![Julia](https://img.shields.io/badge/Julia-1.6+-purple.svg)](https://julialang.org/)
 [![License](https://img.shields.io/badge/license-MPL--2.0-orange.svg)](LICENSE)
 
@@ -261,6 +261,8 @@ snr_range = 0:2:14                # SNR分析范围
 ## 贡献
 
 欢迎贡献代码、报告问题或提出建议！
+
+- 项目维护：[@StevenWin818](https://github.com/StevenWin818)
 
 ## 许可证
 
