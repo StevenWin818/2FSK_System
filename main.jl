@@ -1,6 +1,6 @@
 """
 main.jl - 2FSK调制解调系统主程序
-适用于MWORKS环境的轻量版本（无Plots依赖）
+使用PyPlot进行可视化（图形界面版本）
 """
 
 # 避免重复加载模块的警告
@@ -17,6 +17,36 @@ using .Demodulation
 using .BERAnalysis
 using Statistics
 using FFTW
+using Printf
+
+# 尝试加载PyPlot（全局变量，不能在try中用const）
+PLOTTING_AVAILABLE = false
+try
+    import PyPlot
+    # 显式导入需要的函数为全局变量
+    global figure = PyPlot.figure
+    global subplot = PyPlot.subplot
+    global plot = PyPlot.plot
+    global stem = PyPlot.stem
+    global semilogy = PyPlot.semilogy
+    global title = PyPlot.title
+    global xlabel = PyPlot.xlabel
+    global ylabel = PyPlot.ylabel
+    global legend = PyPlot.legend
+    global grid = PyPlot.grid
+    global ylim = PyPlot.ylim
+    global xlim = PyPlot.xlim
+    global tight_layout = PyPlot.tight_layout
+    global savefig = PyPlot.savefig
+    global close = PyPlot.close
+    global axvline = PyPlot.axvline
+    
+    global PLOTTING_AVAILABLE = true
+    println("✓ PyPlot图形库已加载")
+catch e
+    println("⚠ PyPlot未安装，将只生成数据文件")
+    println("  安装命令: using Pkg; Pkg.add(\"PyPlot\")")
+end
 
 # ==================== 系统参数设置 ====================
 # 获取脚本所在目录
@@ -65,13 +95,6 @@ actual_snr = 10 * log10(signal_power / noise_power)
 println("  实际信噪比: $(round(actual_snr, digits=2)) dB")
 
 println("\n[步骤 4] 包络解调...")
-# 计算滤波器参数用于显示
-freq_separation = abs(F1 - F0)
-bandwidth_used = min(1.2 * SYMBOL_RATE, freq_separation * 0.6)
-println("  频率间隔: $(freq_separation/1000) kHz")
-println("  BPF带宽: $(bandwidth_used/1000) kHz")
-println("  BPF1中心: $(F0/1000) kHz, 范围: $((F0-bandwidth_used/2)/1000)-$((F0+bandwidth_used/2)/1000) kHz")
-println("  BPF2中心: $(F1/1000) kHz, 范围: $((F1-bandwidth_used/2)/1000)-$((F1+bandwidth_used/2)/1000) kHz")
 demodulated_data = Demodulation.envelope_demodulation(received_signal, F0, F1, SYMBOL_RATE, FS)
 println("  解调序列长度: $(length(demodulated_data)) bits")
 
@@ -92,8 +115,63 @@ println("  误码数: $errors")
 println("  误码率: $(round(ber, digits=6))")
 println("  传输准确: $(recovered_text == MESSAGE ? "✓ 成功" : "✗ 失败")")
 
+# ==================== 绘制波形图 ====================
+if PLOTTING_AVAILABLE
+    println("\n[步骤 6] 生成波形图...")
+    
+    try
+        # 只显示前10个码元
+        display_symbols = min(10, length(binary_data))
+        display_samples = display_symbols * SAMPLES_PER_SYMBOL
+        t_display = t[1:display_samples] * 1000  # 转换为毫秒
+        
+        # 创建3个子图
+        figure(figsize=(12, 10))
+        
+        # 子图1: 调制信号
+        subplot(3, 1, 1)
+        plot(t_display, modulated_signal[1:display_samples], "b-", linewidth=0.8)
+        title("2FSK调制信号（前$(display_symbols)个码元）", fontsize=12, fontproperties="SimHei")
+        xlabel("时间 (ms)", fontsize=10, fontproperties="SimHei")
+        ylabel("幅度", fontsize=10, fontproperties="SimHei")
+        grid(true, alpha=0.3)
+        
+        # 子图2: 接收信号（含噪声）
+        subplot(3, 1, 2)
+        plot(t_display, received_signal[1:display_samples], "r-", linewidth=0.8, alpha=0.7)
+        title("接收信号（SNR=$(SNR_TEST)dB）", fontsize=12, fontproperties="SimHei")
+        xlabel("时间 (ms)", fontsize=10, fontproperties="SimHei")
+        ylabel("幅度", fontsize=10, fontproperties="SimHei")
+        grid(true, alpha=0.3)
+        
+        # 子图3: 比特序列对比
+        subplot(3, 1, 3)
+        bit_indices = 1:display_symbols
+        # 原始比特
+        stem(bit_indices, binary_data[bit_indices], linefmt="b-", markerfmt="bo", 
+             basefmt=" ", label="原始比特")
+        # 解调比特
+        stem(bit_indices .+ 0.1, demodulated_data[bit_indices], linefmt="r--", 
+             markerfmt="rx", basefmt=" ", label="解调比特")
+        title("比特序列对比（前$(display_symbols)个比特）", fontsize=12, fontproperties="SimHei")
+        xlabel("比特索引", fontsize=10, fontproperties="SimHei")
+        ylabel("比特值", fontsize=10, fontproperties="SimHei")
+        legend(loc="upper right", prop=Dict("family"=>"SimHei", "size"=>9))
+        grid(true, alpha=0.3)
+        ylim(-0.5, 1.5)
+        
+        tight_layout()
+        output_path = joinpath(SCRIPT_DIR, "waveforms.png")
+        savefig(output_path, dpi=150, bbox_inches="tight")
+        println("  ✓ 波形图已保存: $output_path")
+        close()
+    catch e
+        println("  ⚠ 生成波形图时出错: $e")
+    end
+end
+
 # ==================== 误码率分析 ====================
-println("\n[步骤 6] 误码率分析（不同SNR）...")
+println("\n[步骤 7] 误码率分析（不同SNR）...")
 println("  生成测试序列...")
 
 test_length = 10000
@@ -121,8 +199,36 @@ for (i, snr) in enumerate(snr_range)
 end
 println("  " * "="^60)
 
+# ==================== 绘制BER曲线 ====================
+if PLOTTING_AVAILABLE
+    println("\n[步骤 8] 生成误码率曲线...")
+    
+    try
+        figure(figsize=(10, 7))
+        
+        semilogy(snr_range, ber_simulated, "bo-", linewidth=2, markersize=8, 
+                label="实测BER")
+        semilogy(snr_range, ber_theoretical, "r^--", linewidth=2, markersize=8, 
+                label="理论BER (非相干FSK)")
+        
+        title("2FSK系统误码率性能曲线", fontsize=14, fontproperties="SimHei", fontweight="bold")
+        xlabel("信噪比 SNR (dB)", fontsize=12, fontproperties="SimHei")
+        ylabel("误码率 BER", fontsize=12, fontproperties="SimHei")
+        legend(loc="best", prop=Dict("family"=>"SimHei", "size"=>11))
+        grid(true, which="both", alpha=0.3)
+        ylim(1e-6, 1)
+        
+        output_path = joinpath(SCRIPT_DIR, "ber_curve.png")
+        savefig(output_path, dpi=150, bbox_inches="tight")
+        println("  ✓ BER曲线已保存: $output_path")
+        close()
+    catch e
+        println("  ⚠ 生成BER曲线时出错: $e")
+    end
+end
+
 # ==================== 频谱分析 ====================
-println("\n[步骤 7] 频谱分析...")
+println("\n[步骤 9] 频谱分析...")
 N = length(modulated_signal)
 fft_result = fft(modulated_signal)
 freqs = fftfreq(N, FS)
@@ -142,8 +248,41 @@ if !isempty(peak_indices)
     end
 end
 
-# 保存数据到CSV文件
-println("\n[步骤 8] 保存数据...")
+# ==================== 绘制频谱图 ====================
+if PLOTTING_AVAILABLE
+    println("\n[步骤 10] 生成频谱图...")
+    
+    try
+        # 只绘制感兴趣的频率范围 (0-200 kHz)
+        freq_limit = 200e3
+        freq_mask = positive_freqs .<= freq_limit
+        
+        figure(figsize=(10, 6))
+        
+        plot(positive_freqs[freq_mask] / 1000, magnitude[freq_mask], "b-", linewidth=1.5)
+        
+        # 标注载波频率
+        axvline(x=F0/1000, color="r", linestyle="--", linewidth=2, label=@sprintf("f₀ = %.0f kHz", F0/1000))
+        axvline(x=F1/1000, color="g", linestyle="--", linewidth=2, label=@sprintf("f₁ = %.0f kHz", F1/1000))
+        
+        title("2FSK调制信号频谱", fontsize=14, fontproperties="SimHei", fontweight="bold")
+        xlabel("频率 (kHz)", fontsize=12, fontproperties="SimHei")
+        ylabel("幅度", fontsize=12, fontproperties="SimHei")
+        legend(loc="best", prop=Dict(raw"family"=>"SimHei", "size"=>11))
+        grid(true, alpha=0.3)
+        xlim(0, freq_limit/1000)
+        
+        output_path = joinpath(SCRIPT_DIR, "spectrum.png")
+        savefig(output_path, dpi=150, bbox_inches="tight")
+        println("  ✓ 频谱图已保存: $output_path")
+        close()
+    catch e
+        println("  ⚠ 生成频谱图时出错: $e")
+    end
+end
+
+# ==================== 保存数据 ====================
+println("\n[步骤 11] 保存数据...")
 try
     # 保存误码率数据
     ber_path = joinpath(SCRIPT_DIR, "ber_data.csv")
@@ -173,9 +312,24 @@ end
 println("\n" * "="^60)
 println("程序运行完成！")
 println("="^60)
-println("\n说明:")
-println("  数据已保存到CSV文件:")
-println("    - ber_data.csv: 误码率数据")
-println("    - spectrum_data.csv: 频谱数据")
-println("  您可以使用Excel或其他工具打开这些文件绘制图表")
+
+if PLOTTING_AVAILABLE
+    println("\n生成的文件:")
+    println("  📊 图形文件:")
+    println("    - waveforms.png: 调制/接收信号波形")
+    println("    - ber_curve.png: 误码率曲线")
+    println("    - spectrum.png: 频谱图")
+    println("  📝 数据文件:")
+    println("    - ber_data.csv: 误码率数据")
+    println("    - spectrum_data.csv: 频谱数据")
+else
+    println("\n说明:")
+    println("  ⚠ PyPlot未安装，仅生成了数据文件")
+    println("  数据文件:")
+    println("    - ber_data.csv: 误码率数据")
+    println("    - spectrum_data.csv: 频谱数据")
+    println("\n  安装PyPlot以生成图形:")
+    println("    using Pkg")
+    println("    Pkg.add(\"PyPlot\")")
+end
 println("="^60)

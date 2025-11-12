@@ -40,7 +40,8 @@
 │   ├── channel.jl          # 信道模块（AWGN噪声）
 │   ├── demodulation.jl     # 解调模块（能量检测解调）
 │   └── ber_analysis.jl     # 误码率分析模块
-├── main.jl                 # 主程序（MWORKS环境运行）
+├── main.jl                 # 主程序（图形界面版本）
+├── install_pyplot.jl       # PyPlot安装脚本
 ├── Project.toml            # 项目依赖配置
 ├── README.md               # 项目文档
 ├── QUICKSTART.md           # 快速开始指南
@@ -54,38 +55,41 @@
 ### 环境要求
 
 - **MWORKS Syslab 2025b** 或更高版本（内置Julia 1.9.3）
-- 依赖包：DSP, FFTW, SpecialFunctions, Statistics（自动安装）
+- 依赖包：DSP, FFTW, SpecialFunctions, Statistics, PyPlot（自动安装）
 
 ### 运行程序
 
-1. **打开MWORKS Syslab 2025b**
-
-2. **在命令窗口中运行**：
-   ```julia
-   # 切换到项目目录
-   cd("***REMOVED***")
-   
-   # 运行主程序
-   include("main.jl")
-   ```
-
-3. **查看输出**：
-   - 控制台会显示完整的运行过程和结果
-   - 生成CSV数据文件：`ber_data.csv`, `spectrum_data.csv`
-
-### 首次运行
-
-首次运行时，系统会自动安装所需的依赖包：
+**首次运行（安装PyPlot）**：
 ```julia
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
+# 1. 切换到项目目录
+cd("***REMOVED***")
+
+# 2. 安装PyPlot图形库（只需运行一次）
+include("install_pyplot.jl")
 ```
 
+**日常运行**：
 ```julia
-cd("path/to/2FSK_System")
-include("main_no_plots.jl")
+# 切换到项目目录
+cd("***REMOVED***")
+
+# 运行主程序
+include("main.jl")
 ```
+
+**输出文件**：
+- 📊 **图形文件**：
+  - `waveforms.png` - 调制/接收信号波形图
+  - `ber_curve.png` - 误码率曲线图
+  - `spectrum.png` - 频谱图
+- 📝 **数据文件**：
+  - `ber_data.csv` - 误码率数据
+  - `spectrum_data.csv` - 频谱数据
+
+### 备注
+
+- 如果PyPlot安装困难，程序会自动降级为仅生成CSV数据文件
+- 无图形版本已备份在父文件夹：`../main_no_gui_backup.jl`
 
 ## 功能模块
 
@@ -123,11 +127,14 @@ include("main_no_plots.jl")
 ### 文件输出（无Plots版本）
 - `ber_data.csv` - 误码率数据
 - `spectrum_data.csv` - 频谱数据
+- **备注**：无图形版本已备份在 `../main_no_gui_backup.jl`
 
-### 图像输出（标准版本）
+### 图像输出（图形版本）
 - `waveforms.png` - 信号波形图
 - `ber_curve.png` - 误码率曲线
 - `spectrum.png` - 频谱图
+- `ber_data.csv` - 误码率数据
+- `spectrum_data.csv` - 频谱数据
 
 ## 理论基础
 
@@ -154,7 +161,7 @@ $$P_e = \frac{1}{2} \exp\left(-\frac{E_b}{2N_0}\right)$$
 
 ## 自定义参数
 
-在 `main.jl` 或 `main_no_plots.jl` 中修改：
+在 `main.jl` 中修改：
 
 ```julia
 const MESSAGE = "你的消息"        # 传输内容
@@ -176,8 +183,11 @@ snr_range = 0:2:14                # SNR分析范围
 
 ## 常见问题
 
-### Q: Plots包预编译失败？
-**A**: 使用 `main_no_plots.jl` 版本，功能完整且更快。
+### Q: PyPlot安装失败？
+**A**: 参考 `QUICKSTART_GUI.md` 中的详细故障排除指南，或使用备份的无图形版本。
+
+### Q: 程序运行但没有生成图片？
+**A**: PyPlot可能加载失败，程序会自动降级为仅生成CSV数据文件。检查控制台输出。
 
 ### Q: 如何修改载波频率？
 **A**: 修改 `F0` 和 `F1` 参数，建议保持 f0=4×symbol_rate, f1=2×symbol_rate 的关系。
@@ -185,8 +195,11 @@ snr_range = 0:2:14                # SNR分析范围
 ### Q: 如何增加测试数据量？
 **A**: 修改 `test_length` 变量（默认10000）。
 
-### Q: 中文显示异常？
-**A**: 确保终端支持UTF-8编码，或修改消息为纯英文。
+### Q: 如何使用无图形版本？
+**A**: 运行父文件夹中的备份文件：
+```julia
+include("../main_no_gui_backup.jl")
+```
 
 ## 版本历史
 

@@ -8,16 +8,18 @@
   - DSP.jl
   - FFTW.jl
   - SpecialFunctions.jl
+  - PyPlot.jl（图形界面）
 
 ## 快速运行
 
-### 方法：在MWORKS中运行（推荐）
+### 首次运行（安装PyPlot）
 
 1. **打开MWORKS Syslab 2025b**
 
-2. **切换到项目目录**：
+2. **安装图形库**：
    ```julia
    cd("***REMOVED***")
+   include("install_pyplot.jl")
    ```
 
 3. **运行主程序**：
@@ -25,20 +27,22 @@
    include("main.jl")
    ```
 
-4. **查看结果**：
-   - 控制台实时显示运行进度
-   - 生成的CSV文件在当前目录
+### 日常运行
 
-### 首次运行
-
-如果是第一次运行，需要先安装依赖：
 ```julia
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
+# 1. 切换到项目目录
+cd("***REMOVED***")
+
+# 2. 运行主程序
+include("main.jl")
 ```
 
-然后再运行 `include("main.jl")`
+### 如果PyPlot安装困难
+
+使用备份的无图形版本：
+```julia
+include("../main_no_gui_backup.jl")
+```
 
 ## 系统参数
 
@@ -54,13 +58,30 @@ Pkg.instantiate()
 
 ## 输出文件
 
-运行完成后，会在当前目录生成：
+运行完成后，会在项目目录生成：
 
+### 图形文件
+1. **waveforms.png** - 波形对比图
+   - 调制信号波形
+   - 接收信号波形（含噪声）
+   - 比特序列对比
+
+2. **ber_curve.png** - 误码率曲线
+   - 实测BER vs SNR
+   - 理论BER vs SNR
+
+3. **spectrum.png** - 频谱分析图
+   - 标注f0和f1载波频率
+
+### 数据文件
 1. **ber_data.csv** - 误码率分析数据
    - 列：SNR_dB, Simulated_BER, Theoretical_BER
    
 2. **spectrum_data.csv** - 频谱分析数据
    - 列：Frequency_kHz, Magnitude
+
+### 如果没有生成图片
+程序会自动降级为仅生成CSV数据文件（PyPlot加载失败时）
 
 ## 使用示例
 
