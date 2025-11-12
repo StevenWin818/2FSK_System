@@ -21,10 +21,13 @@ using Printf
 
 # 尝试加载PyPlot（全局变量，不能在try中用const）
 PLOTTING_AVAILABLE = false
-USE_MWORKS_DISPLAY = false
 
 try
     import PyPlot
+    
+    # 设置交互式模式
+    PyPlot.ion()  # 打开交互式模式
+    
     # 显式导入需要的函数为全局变量
     global figure = PyPlot.figure
     global subplot = PyPlot.subplot
@@ -40,19 +43,13 @@ try
     global xlim = PyPlot.xlim
     global tight_layout = PyPlot.tight_layout
     global savefig = PyPlot.savefig
-    global show = PyPlot.show
-    global close = PyPlot.close
+    global draw = PyPlot.draw
+    global pause = PyPlot.pause
+    global gcf = PyPlot.gcf
     global axvline = PyPlot.axvline
     
     global PLOTTING_AVAILABLE = true
-    
-    # 检测是否在MWORKS环境中
-    if isdefined(Main, :mworks) || isdefined(Main, :MWORKS)
-        global USE_MWORKS_DISPLAY = true
-        println("✓ PyPlot图形库已加载（MWORKS显示模式）")
-    else
-        println("✓ PyPlot图形库已加载")
-    end
+    println("✓ PyPlot图形库已加载（交互式模式）")
 catch e
     println("⚠ PyPlot未安装，将只生成数据文件")
     println("  安装命令: using Pkg; Pkg.add(\"PyPlot\")")
@@ -171,19 +168,15 @@ if PLOTTING_AVAILABLE
         ylim(-0.5, 1.5)
         
         tight_layout()
+        draw()  # 强制绘制
+        pause(0.5)  # 暂停让图窗完全显示
         
-        # 保存图片并在MWORKS中显示
+        # 保存图片
         output_path = joinpath(SCRIPT_DIR, "waveforms.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ 波形图已保存: $output_path")
+        println("  ✓ 图窗1已显示（可交互）")
         
-        if USE_MWORKS_DISPLAY
-            show()  # 在MWORKS中显示图窗
-            println("  ✓ 图窗已在MWORKS中打开")
-        end
-        
-        # 不自动关闭，让用户可以查看
-        # close()
     catch e
         println("  ⚠ 生成波形图时出错: $e")
     end
@@ -236,18 +229,14 @@ if PLOTTING_AVAILABLE
         legend(loc="best", prop=Dict("family"=>"SimHei", "size"=>11))
         grid(true, which="both", alpha=0.3)
         ylim(1e-6, 1)
+        draw()  # 强制绘制
+        pause(0.5)  # 暂停让图窗完全显示
         
         output_path = joinpath(SCRIPT_DIR, "ber_curve.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ BER曲线已保存: $output_path")
+        println("  ✓ 图窗2已显示（可交互）")
         
-        if USE_MWORKS_DISPLAY
-            show()  # 在MWORKS中显示图窗
-            println("  ✓ 图窗已在MWORKS中打开")
-        end
-        
-        # 不自动关闭，让用户可以查看
-        # close()
     catch e
         println("  ⚠ 生成BER曲线时出错: $e")
     end
@@ -297,18 +286,14 @@ if PLOTTING_AVAILABLE
         legend(loc="best", prop=Dict(raw"family"=>"SimHei", "size"=>11))
         grid(true, alpha=0.3)
         xlim(0, freq_limit/1000)
+        draw()  # 强制绘制
+        pause(0.5)  # 暂停让图窗完全显示
         
         output_path = joinpath(SCRIPT_DIR, "spectrum.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ 频谱图已保存: $output_path")
+        println("  ✓ 图窗3已显示（可交互）")
         
-        if USE_MWORKS_DISPLAY
-            show()  # 在MWORKS中显示图窗
-            println("  ✓ 图窗已在MWORKS中打开")
-        end
-        
-        # 不自动关闭，让用户可以查看
-        # close()
     catch e
         println("  ⚠ 生成频谱图时出错: $e")
     end
@@ -355,11 +340,10 @@ if PLOTTING_AVAILABLE
     println("  📝 数据文件:")
     println("    - ber_data.csv: 误码率数据")
     println("    - spectrum_data.csv: 频谱数据")
-    
-    if USE_MWORKS_DISPLAY
-        println("\n  💡 提示：图形已在MWORKS窗口中打开")
-        println("     可以放大、缩小、保存等操作")
-    end
+    println("\n  💡 提示：3个交互式图窗已打开")
+    println("     - 可以放大、缩小、平移查看细节")
+    println("     - 图窗会保持打开状态")
+    println("     - 关闭图窗请点击窗口的X按钮")
 else
     println("\n说明:")
     println("  ⚠ PyPlot未安装，仅生成了数据文件")
