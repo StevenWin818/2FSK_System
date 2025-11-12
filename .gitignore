@@ -1,0 +1,43 @@
+# Julia 相关文件
+Manifest.toml
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+deps/deps.jl
+
+# 构建和临时文件
+/build/
+/tmp/
+*.swp
+*.swo
+*~
+
+# 数据和输出文件
+*.csv
+*.dat
+*.txt
+*.log
+
+# 图形输出文件
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+*.svg
+
+# IDE 相关
+.vscode/
+.idea/
+*.sublime-*
+.DS_Store
+Thumbs.db
+
+# 系统文件
+*.bak
+*.tmp
+*.temp
+.Rhistory
+
+# 包缓存
+.CondaPkg/
