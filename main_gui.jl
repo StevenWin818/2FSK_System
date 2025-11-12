@@ -3,10 +3,13 @@ main_gui.jl - 2FSK调制解调系统主程序（图形版本）
 使用PyPlot进行可视化（比Plots.jl在MWORKS中更稳定）
 """
 
-include("src/modulation.jl")
-include("src/channel.jl")
-include("src/demodulation.jl")
-include("src/ber_analysis.jl")
+# 避免重复加载模块的警告
+if !@isdefined(Modulation)
+    include("src/modulation.jl")
+    include("src/channel.jl")
+    include("src/demodulation.jl")
+    include("src/ber_analysis.jl")
+end
 
 using .Modulation
 using .Channel
@@ -16,25 +19,25 @@ using Statistics
 using FFTW
 using Printf
 
-# 尝试加载PyPlot
+# 尝试加载PyPlot（全局变量，不能在try中用const）
+PLOTTING_AVAILABLE = false
 try
     using PyPlot
-    const PLOTTING_AVAILABLE = true
+    global PLOTTING_AVAILABLE = true
     println("✓ PyPlot图形库已加载")
 catch e
-    const PLOTTING_AVAILABLE = false
     println("⚠ PyPlot未安装，将只生成数据文件")
     println("  安装命令: using Pkg; Pkg.add(\"PyPlot\")")
 end
 
 # ==================== 系统参数设置 ====================
-const MESSAGE = "测试624438"
-const SYMBOL_RATE = 21e3
-const F0 = 4 * SYMBOL_RATE
-const F1 = 2 * SYMBOL_RATE
-const FS = 10 * F0
-const SNR_TEST = 10.0
-const SAMPLES_PER_SYMBOL = Int(FS / SYMBOL_RATE)
+MESSAGE = "测试624438"
+SYMBOL_RATE = 21e3
+F0 = 4 * SYMBOL_RATE
+F1 = 2 * SYMBOL_RATE
+FS = 10 * F0
+SNR_TEST = 10.0
+SAMPLES_PER_SYMBOL = Int(FS / SYMBOL_RATE)
 
 println("="^60)
 println("2FSK调制解调系统 - 图形界面版本")

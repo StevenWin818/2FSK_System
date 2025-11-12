@@ -3,10 +3,13 @@ main.jl - 2FSK调制解调系统主程序
 适用于MWORKS环境的轻量版本（无Plots依赖）
 """
 
-include("src/modulation.jl")
-include("src/channel.jl")
-include("src/demodulation.jl")
-include("src/ber_analysis.jl")
+# 避免重复加载模块的警告
+if !@isdefined(Modulation)
+    include("src/modulation.jl")
+    include("src/channel.jl")
+    include("src/demodulation.jl")
+    include("src/ber_analysis.jl")
+end
 
 using .Modulation
 using .Channel
@@ -16,13 +19,13 @@ using Statistics
 using FFTW
 
 # ==================== 系统参数设置 ====================
-const MESSAGE = "测试624438"
-const SYMBOL_RATE = 21e3
-const F0 = 4 * SYMBOL_RATE
-const F1 = 2 * SYMBOL_RATE
-const FS = 10 * F0
-const SNR_TEST = 10.0
-const SAMPLES_PER_SYMBOL = Int(FS / SYMBOL_RATE)
+MESSAGE = "测试624438"
+SYMBOL_RATE = 21e3
+F0 = 4 * SYMBOL_RATE
+F1 = 2 * SYMBOL_RATE
+FS = 10 * F0
+SNR_TEST = 10.0
+SAMPLES_PER_SYMBOL = Int(FS / SYMBOL_RATE)
 
 println("="^60)
 println("2FSK调制解调系统")
