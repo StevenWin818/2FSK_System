@@ -276,9 +276,9 @@ if PLOTTING_AVAILABLE
         
         plot(positive_freqs[freq_mask] / 1000, magnitude[freq_mask], "b-", linewidth=1.5)
         
-        # 标注载波频率
-        axvline(x=F0/1000, color="r", linestyle="--", linewidth=2, label=@sprintf("f₀ = %.0f kHz", F0/1000))
-        axvline(x=F1/1000, color="g", linestyle="--", linewidth=2, label=@sprintf("f₁ = %.0f kHz", F1/1000))
+        # 标注载波频率（使用普通文本避免字体警告）
+        axvline(x=F0/1000, color="r", linestyle="--", linewidth=2, label=@sprintf("f0 = %.0f kHz", F0/1000))
+        axvline(x=F1/1000, color="g", linestyle="--", linewidth=2, label=@sprintf("f1 = %.0f kHz", F1/1000))
         
         title("2FSK调制信号频谱", fontsize=14, fontproperties="SimHei", fontweight="bold")
         xlabel("频率 (kHz)", fontsize=12, fontproperties="SimHei")
