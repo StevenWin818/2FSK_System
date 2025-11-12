@@ -19,7 +19,6 @@ deps/deps.jl
 *.log
 
 # 图形输出文件
-*.png
 *.jpg
 *.jpeg
 *.gif

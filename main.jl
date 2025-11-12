@@ -1,7 +1,7 @@
 ﻿"""
 main.jl - 2FSK调制解调系统主程序
 使用PyPlot进行可视化（图形界面版本）
-版本: v1.3.1
+版本: v1.3.2
 """
 
 # 避免重复加载模块的警告
@@ -20,7 +20,7 @@ using Statistics
 using FFTW
 using Printf
 
-# 尝试加载PyPlot（全局变量，不能在try中用const）
+# 尝试加载PyPlot
 PLOTTING_AVAILABLE = false
 
 try
@@ -72,7 +72,14 @@ end
 # 获取脚本所在目录
 SCRIPT_DIR = @__DIR__
 
-MESSAGE = "测试624438"
+# 控制台输出使用相对路径，避免暴露本机绝对目录
+show_local_path(path::AbstractString) = try
+    relpath(path, SCRIPT_DIR)
+catch
+    basename(path)
+end
+
+MESSAGE = "测试251113"
 SYMBOL_RATE = 21e3
 F0 = 4 * SYMBOL_RATE
 F1 = 2 * SYMBOL_RATE
@@ -185,7 +192,7 @@ if PLOTTING_AVAILABLE
         # 保存图片
         output_path = joinpath(SCRIPT_DIR, "waveforms.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
-        println("  ✓ 波形图已保存: $output_path")
+        println("  ✓ 波形图已保存: $(show_local_path(output_path))")
         println("  ✓ 图窗1已创建")
         
     catch e
@@ -243,7 +250,7 @@ if PLOTTING_AVAILABLE
         
         output_path = joinpath(SCRIPT_DIR, "ber_curve.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
-        println("  ✓ BER曲线已保存: $output_path")
+        println("  ✓ BER曲线已保存: $(show_local_path(output_path))")
         println("  ✓ 图窗2已创建")
         
     catch e
@@ -285,7 +292,7 @@ if PLOTTING_AVAILABLE
         
         plot(positive_freqs[freq_mask] / 1000, magnitude[freq_mask], "b-", linewidth=1.5)
         
-        # 标注载波频率（使用普通文本避免字体警告）
+        # 标注载波频率
         axvline(x=F0/1000, color="r", linestyle="--", linewidth=2, label=@sprintf("f0 = %.0f kHz", F0/1000))
         axvline(x=F1/1000, color="g", linestyle="--", linewidth=2, label=@sprintf("f1 = %.0f kHz", F1/1000))
         
@@ -298,7 +305,7 @@ if PLOTTING_AVAILABLE
         
         output_path = joinpath(SCRIPT_DIR, "spectrum.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
-        println("  ✓ 频谱图已保存: $output_path")
+        println("  ✓ 频谱图已保存: $(show_local_path(output_path))")
         println("  ✓ 图窗3已创建")
         
     catch e
@@ -317,7 +324,7 @@ try
             println(f, "$snr,$(ber_simulated[i]),$(ber_theoretical[i])")
         end
     end
-    println("  ✓ BER数据已保存: $ber_path")
+    println("  ✓ BER数据已保存: $(show_local_path(ber_path))")
     
     # 保存频谱数据（部分）
     spectrum_path = joinpath(SCRIPT_DIR, "spectrum_data.csv")
@@ -328,7 +335,7 @@ try
             println(f, "$(positive_freqs[i]/1000),$(magnitude[i])")
         end
     end
-    println("  ✓ 频谱数据已保存: $spectrum_path")
+    println("  ✓ 频谱数据已保存: $(show_local_path(spectrum_path))")
 catch e
     println("  ⚠ 保存数据时出错: $e")
 end

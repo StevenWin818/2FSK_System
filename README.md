@@ -1,9 +1,10 @@
 ﻿# 2FSK调制解调系统
 
-[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](https://github.com/yourusername/2FSK_System)
+[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://github.com/yourusername/2FSK_System)
 [![Julia](https://img.shields.io/badge/Julia-1.6+-purple.svg)](https://julialang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MPL--2.0-orange.svg)](LICENSE)
 
+> **✨ v1.3.2 更新**: 提供历史清理脚本、输出路径脱敏、文档全面对齐！
 > **✨ v1.3.1 更新**: 移除所有隐私信息，使用通用路径占位符，项目更安全！
 
 > **✨ v1.3.0 重大更新**: 交互式图窗功能完全可用，无冻结问题！
@@ -26,7 +27,7 @@
 
 | 参数 | 值 | 说明 |
 |------|-----|------|
-| 传输信息 | "测试624438" | 可自定义 |
+| 传输信息 | "测试251113" | 可自定义 |
 | 码元速率 | 21 KBaud | 符号传输速率 |
 | 载波频率 f0 | 84 kHz | 表示比特'0' (4×21kHz) |
 | 载波频率 f1 | 42 kHz | 表示比特'1' (2×21kHz) |
@@ -47,10 +48,13 @@
 ├── main.jl                 # 主程序（图形界面版本）
 ├── install_pyplot.jl       # PyPlot安装脚本
 ├── Project.toml            # 项目依赖配置
-├── README.md               # 项目文档
-├── QUICKSTART.md           # 快速开始指南
-├── CHANGELOG.md            # 版本更新日志
-├── LICENSE                 # MIT许可证
+├── tools/privacy/          # Git历史清理辅助文件
+├── docs/                   # 文档集合（除README外）
+│   ├── CHANGELOG.md        # 版本更新日志
+│   ├── PRIVACY_NOTE.md     # 隐私信息说明
+│   └── QUICKSTART.md       # 快速开始与图形指南
+├── README.md               # 项目文档（本文件）
+├── LICENSE                 # Mozilla Public License 2.0
 └── .gitignore              # Git忽略配置
 ```
 
@@ -63,11 +67,25 @@
 
 ### 路径配置
 
-⚠️ **重要**：本项目使用通用路径占位符 `<PROJECT_ROOT>`，首次使用前请：
-1. 将项目解压到您的目标目录，例如：`D:/Projects/2FSK_System`
-2. 在代码中将 `<PROJECT_ROOT>` 替换为实际路径，或直接在REPL中设置工作目录
+首次运行前请确认所有占位符已替换为实际环境信息：
 
-详见 [SETUP.md](SETUP.md)
+- `<PROJECT_ROOT>`：项目根目录（例：`D:/Projects/2FSK_System`）
+- `<USER_ONEDRIVE>`：OneDrive 文件夹名称
+- `<USER>`：操作系统用户名
+
+在 Julia REPL 中可通过以下方式完成配置：
+
+```julia
+PROJECT_ROOT = "D:/Projects/2FSK_System"  # 修改为你的真实路径
+cd(PROJECT_ROOT)
+```
+
+Windows 支持 `"D:/..."` 与 `"D:\\..."` 两种写法。建议完成下列检查清单：
+
+- [ ] `<PROJECT_ROOT>` 已更新为真实路径
+- [ ] Julia 版本 ≥ 1.6，MWORKS Syslab 已安装
+- [ ] `install_pyplot.jl` 成功运行
+- [ ] `main.jl` 可无误执行
 
 ### 运行程序
 
@@ -101,8 +119,9 @@ include("main.jl")
 ### 备注
 
 - 如果PyPlot安装困难，程序会自动降级为仅生成CSV数据文件
-- 无图形版本已备份在父文件夹：`../main_no_gui_backup.jl`
 - **路径说明**：文档中的 `<PROJECT_ROOT>` 需要替换为您的实际项目路径
+
+更多使用示例（含图形模式）可参见 `docs/QUICKSTART.md`。
 
 ## 功能模块
 
@@ -140,7 +159,6 @@ include("main.jl")
 ### 文件输出（无Plots版本）
 - `ber_data.csv` - 误码率数据
 - `spectrum_data.csv` - 频谱数据
-- **备注**：无图形版本已备份在 `../main_no_gui_backup.jl`
 
 ### 图像输出（图形版本）
 - `waveforms.png` - 信号波形图
@@ -148,6 +166,12 @@ include("main.jl")
 - `spectrum.png` - 频谱图
 - `ber_data.csv` - 误码率数据
 - `spectrum_data.csv` - 频谱数据
+
+![波形图示例](waveforms.png)
+
+![误码率曲线示例](ber_curve.png)
+
+![频谱图示例](spectrum.png)
 
 ## 理论基础
 
@@ -197,7 +221,7 @@ snr_range = 0:2:14                # SNR分析范围
 ## 常见问题
 
 ### Q: PyPlot安装失败？
-**A**: 参考 `QUICKSTART_GUI.md` 中的详细故障排除指南，或使用备份的无图形版本。
+**A**: 参考 `docs/QUICKSTART.md` 中的故障排除步骤，或暂时以CSV数据模式运行（程序会自动降级）。
 
 ### Q: 程序运行但没有生成图片？
 **A**: PyPlot可能加载失败，程序会自动降级为仅生成CSV数据文件。检查控制台输出。
@@ -209,14 +233,11 @@ snr_range = 0:2:14                # SNR分析范围
 **A**: 修改 `test_length` 变量（默认10000）。
 
 ### Q: 如何使用无图形版本？
-**A**: 运行父文件夹中的备份文件：
-```julia
-include("../main_no_gui_backup.jl")
-```
+**A**: 不安装PyPlot即可触发降级模式，程序会自动跳过绘图并仅生成CSV数据文件。
 
 ## 版本历史
 
-查看 [CHANGELOG.md](CHANGELOG.md) 了解详细更新历史。
+查看 [docs/CHANGELOG.md](docs/CHANGELOG.md) 了解详细更新历史。
 
 ### v1.0.0 (2025-11-13)
 - 🎉 首次发布
@@ -228,9 +249,8 @@ include("../main_no_gui_backup.jl")
 ## 技术支持
 
 ### 文档
-- [快速开始指南](docs/QUICKSTART.md)
-- [API参考](docs/API.md)
-- [故障排除](docs/TROUBLESHOOTING.md)
+- [快速开始与图形指南](docs/QUICKSTART.md)
+- [版本更新日志](docs/CHANGELOG.md)
 
 ### 问题反馈
 如遇到问题，请提供：
@@ -244,7 +264,7 @@ include("../main_no_gui_backup.jl")
 
 ## 许可证
 
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
+本项目采用 Mozilla Public License 2.0。详见 [LICENSE](LICENSE) 文件。
 
 ## 致谢
 
@@ -252,11 +272,3 @@ include("../main_no_gui_backup.jl")
 - DSP.jl、FFTW.jl、Plots.jl 等开源项目
 - MWORKS Syslab开发团队
 
-## 作者
-
-MWORKS项目组  
-创建日期：2025年11月13日
-
----
-
-**关键词**：2FSK, 频移键控, Julia, 数字通信, 调制解调, 误码率分析, MWORKS
