@@ -27,9 +27,9 @@ function bandpass_filter(signal::Vector{Float64}, center_freq::Float64,
     low_freq = (center_freq - bandwidth/2) / nyquist
     high_freq = (center_freq + bandwidth/2) / nyquist
     
-    # 确保频率在有效范围内
-    low_freq = max(0.01, min(0.99, low_freq))
-    high_freq = max(0.01, min(0.99, high_freq))
+    # 确保频率在有效范围内，并保证low < high
+    low_freq = max(0.01, min(0.95, low_freq))
+    high_freq = max(low_freq + 0.01, min(0.99, high_freq))
     
     # 设计Butterworth带通滤波器
     responsetype = Bandpass(low_freq, high_freq, fs=1.0)
@@ -48,14 +48,40 @@ end
 包络检测器
 输入:
   - signal: 输入信号
+  - fs: 采样频率（可选，用于低通滤波）
 输出:
   - envelope: 包络信号
 """
-function envelope_detector(signal::Vector{Float64})
-    # 方法1：希尔伯特变换法
-    # 计算解析信号，其幅度即为包络
-    analytic_signal = hilbert(signal)
-    envelope = abs.(analytic_signal)
+function envelope_detector(signal::Vector{Float64}, fs::Float64=1.0)
+    # 方法：平方律检测
+    # 信号平方后包含直流分量（包络的平方）和高频分量
+    squared = signal.^2
+    
+    # 使用移动平均提取直流分量（包络平方）
+    # 关键：窗口大小不能超过码元长度，否则会混淆相邻码元
+    # 对于21KBaud，码元周期 = 1/21000 = 47.6us
+    # 对于840kHz采样率，每码元40个采样点
+    # 窗口应该小于码元长度，取码元长度的1/4
+    if fs > 1.0
+        # 窗口大小：约10个采样点（约12us）
+        # 这样可以平滑载波波动，但不会跨越码元边界
+        window_size = max(3, Int(fs / 84000))  # 约载波周期
+    else
+        window_size = 3
+    end
+    
+    # 移动平均滤波
+    envelope_squared = similar(squared)
+    half_window = window_size ÷ 2
+    
+    for i in 1:length(squared)
+        start_idx = max(1, i - half_window)
+        end_idx = min(length(squared), i + half_window)
+        envelope_squared[i] = mean(squared[start_idx:end_idx])
+    end
+    
+    # 开方得到包络
+    envelope = sqrt.(abs.(envelope_squared))
     
     return envelope
 end
@@ -90,7 +116,7 @@ function simple_envelope_detector(signal::Vector{Float64}, cutoff_freq::Float64,
 end
 
 """
-比特判决
+比特判决（简化版）
 输入:
   - envelope0: 频率f0的包络
   - envelope1: 频率f1的包络
@@ -114,6 +140,7 @@ function bit_decision(envelope0::Vector{Float64}, envelope1::Vector{Float64},
         
         # 判决：哪个包络能量大，就判为对应的比特
         # f0对应比特'0'，f1对应比特'1'
+        # 所以：energy0大 → 判'0'，energy1大 → 判'1'
         bits[i] = energy1 > energy0 ? 1 : 0
     end
     
@@ -135,23 +162,37 @@ function envelope_demodulation(received_signal::Vector{Float64}, f0::Float64,
                               f1::Float64, symbol_rate::Float64, fs::Float64)
     # 计算每个码元的采样点数
     samples_per_symbol = Int(fs / symbol_rate)
+    n_symbols = Int(length(received_signal) / samples_per_symbol)
+    bits = zeros(Int, n_symbols)
     
-    # 滤波器带宽（根据码元速率设置）
-    # 带宽约为码元速率的2倍（考虑主瓣）
-    bandwidth = 2 * symbol_rate
+    # 方法：非相干包络解调
+    # 生成本地载波用于混频
+    t = (0:length(received_signal)-1) / fs
+    carrier0 = cos.(2π * f0 * t)
+    carrier1 = cos.(2π * f1 * t)
     
-    # 步骤1: 通过两个带通滤波器分离两个频率分量
-    signal_f0 = bandpass_filter(received_signal, f0, bandwidth, fs)
-    signal_f1 = bandpass_filter(received_signal, f1, bandwidth, fs)
+    # 对每个码元进行包络检测
+    for i in 1:n_symbols
+        start_idx = (i-1) * samples_per_symbol + 1
+        end_idx = i * samples_per_symbol
+        
+        # 方法：平方律检波（能量检测）
+        # 计算在当前码元周期内，与两个频率匹配的能量
+        
+        # 方法1: 直接能量检测（更简单可靠）
+        # 与f0混频后的能量
+        mixed0 = received_signal[start_idx:end_idx] .* carrier0[start_idx:end_idx]
+        energy0 = sum(mixed0.^2)
+        
+        # 与f1混频后的能量  
+        mixed1 = received_signal[start_idx:end_idx] .* carrier1[start_idx:end_idx]
+        energy1 = sum(mixed1.^2)
+        
+        # 判决：哪个能量大，就判为对应的比特
+        bits[i] = energy1 > energy0 ? 1 : 0
+    end
     
-    # 步骤2: 包络检测
-    envelope0 = envelope_detector(signal_f0)
-    envelope1 = envelope_detector(signal_f1)
-    
-    # 步骤3: 比特判决
-    demodulated_bits = bit_decision(envelope0, envelope1, samples_per_symbol)
-    
-    return demodulated_bits
+    return bits
 end
 
 """

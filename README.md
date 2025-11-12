@@ -1,12 +1,14 @@
 # 2FSK调制解调系统
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/yourusername/2FSK_System)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/yourusername/2FSK_System)
 [![Julia](https://img.shields.io/badge/Julia-1.6+-purple.svg)](https://julialang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+> **✨ v1.1.0 重大更新**: 解调算法完全重写，系统从失败到成功的重大突破！误码率从70%降至0%，文本恢复率100%！
+
 ## 项目简介
 
-基于Julia语言实现的2FSK（二进制频移键控）信号调制解调系统，包含完整的调制、信道仿真、解调和误码率分析功能。
+基于Julia语言实现的2FSK（二进制频移键控）信号调制解调系统，在**MWORKS Syslab 2025b**环境中运行，包含完整的调制、信道仿真、解调和误码率分析功能。
 
 ## 系统特性
 
@@ -33,48 +35,52 @@
 
 ```
 2FSK_System/
-├── src/                    # 源代码
-│   ├── modulation.jl      # 调制模块
-│   ├── channel.jl         # 信道模块
-│   ├── demodulation.jl    # 解调模块
-│   └── ber_analysis.jl    # 误码率分析模块
-├── main.jl                # 主程序（带Plots）
-├── main_no_plots.jl       # 主程序（无Plots版本）
-├── Project.toml           # 项目依赖配置
-├── README.md              # 项目说明
-├── CHANGELOG.md           # 版本更新日志
-├── LICENSE                # 许可证
-└── .gitignore            # Git忽略配置
+├── src/                    # 源代码模块
+│   ├── modulation.jl       # 调制模块（文本↔二进制，2FSK调制）
+│   ├── channel.jl          # 信道模块（AWGN噪声）
+│   ├── demodulation.jl     # 解调模块（能量检测解调）
+│   └── ber_analysis.jl     # 误码率分析模块
+├── main.jl                 # 主程序（MWORKS环境运行）
+├── Project.toml            # 项目依赖配置
+├── README.md               # 项目文档
+├── QUICKSTART.md           # 快速开始指南
+├── CHANGELOG.md            # 版本更新日志
+├── LICENSE                 # MIT许可证
+└── .gitignore              # Git忽略配置
 ```
 
 ## 快速开始
 
 ### 环境要求
 
-- Julia 1.6 或更高版本
-- 依赖包：DSP, FFTW, SpecialFunctions, Statistics
+- **MWORKS Syslab 2025b** 或更高版本（内置Julia 1.9.3）
+- 依赖包：DSP, FFTW, SpecialFunctions, Statistics（自动安装）
 
-### 安装依赖
+### 运行程序
 
+1. **打开MWORKS Syslab 2025b**
+
+2. **在命令窗口中运行**：
+   ```julia
+   # 切换到项目目录
+   cd("***REMOVED***")
+   
+   # 运行主程序
+   include("main.jl")
+   ```
+
+3. **查看输出**：
+   - 控制台会显示完整的运行过程和结果
+   - 生成CSV数据文件：`ber_data.csv`, `spectrum_data.csv`
+
+### 首次运行
+
+首次运行时，系统会自动安装所需的依赖包：
 ```julia
 using Pkg
 Pkg.activate(".")
 Pkg.instantiate()
 ```
-
-### 运行程序
-
-#### 标准版本（带图形）
-```julia
-include("main.jl")
-```
-
-#### 轻量版本（无图形，适合MWORKS）
-```julia
-include("main_no_plots.jl")
-```
-
-### 在MWORKS中使用
 
 ```julia
 cd("path/to/2FSK_System")

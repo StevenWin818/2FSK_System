@@ -42,6 +42,9 @@ println("\n[步骤 1] 文本转二进制...")
 binary_data = Modulation.text_to_binary(MESSAGE)
 println("  原始信息: $MESSAGE")
 println("  二进制序列长度: $(length(binary_data)) bits")
+n_zeros = sum(binary_data .== 0)
+n_ones = sum(binary_data .== 1)
+println("  比特分布: 0=$(n_zeros), 1=$(n_ones)")
 
 println("\n[步骤 2] 2FSK调制...")
 t, modulated_signal = Modulation.fsk_modulate(binary_data, F0, F1, SYMBOL_RATE, FS)
@@ -56,12 +59,24 @@ actual_snr = 10 * log10(signal_power / noise_power)
 println("  实际信噪比: $(round(actual_snr, digits=2)) dB")
 
 println("\n[步骤 4] 包络解调...")
+# 计算滤波器参数用于显示
+freq_separation = abs(F1 - F0)
+bandwidth_used = min(1.2 * SYMBOL_RATE, freq_separation * 0.6)
+println("  频率间隔: $(freq_separation/1000) kHz")
+println("  BPF带宽: $(bandwidth_used/1000) kHz")
+println("  BPF1中心: $(F0/1000) kHz, 范围: $((F0-bandwidth_used/2)/1000)-$((F0+bandwidth_used/2)/1000) kHz")
+println("  BPF2中心: $(F1/1000) kHz, 范围: $((F1-bandwidth_used/2)/1000)-$((F1+bandwidth_used/2)/1000) kHz")
 demodulated_data = Demodulation.envelope_demodulation(received_signal, F0, F1, SYMBOL_RATE, FS)
 println("  解调序列长度: $(length(demodulated_data)) bits")
 
 println("\n[步骤 5] 恢复文本...")
 recovered_text = Modulation.binary_to_text(demodulated_data)
 println("  恢复的信息: $recovered_text")
+
+# 显示解调比特分布
+demod_zeros = sum(demodulated_data .== 0)
+demod_ones = sum(demodulated_data .== 1)
+println("  解调比特分布: 0=$(demod_zeros), 1=$(demod_ones)")
 
 # 计算误码率
 errors = sum(binary_data .!= demodulated_data)

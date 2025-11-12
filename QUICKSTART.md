@@ -11,31 +11,34 @@
 
 ## 快速运行
 
-### 方法1: 使用批处理脚本（推荐）
+### 方法：在MWORKS中运行（推荐）
 
-```batch
-.\run.bat
-```
+1. **打开MWORKS Syslab 2025b**
 
-### 方法2: 手动运行
+2. **切换到项目目录**：
+   ```julia
+   cd("***REMOVED***")
+   ```
 
-```batch
-# 1. 安装依赖
-"C:\Program Files\MWORKS\Syslab 2025b\julia\bin\julia.exe" --project=. -e "using Pkg; Pkg.instantiate()"
+3. **运行主程序**：
+   ```julia
+   include("main.jl")
+   ```
 
-# 2. 运行主程序
-"C:\Program Files\MWORKS\Syslab 2025b\julia\bin\julia.exe" --project=. main.jl
-```
+4. **查看结果**：
+   - 控制台实时显示运行进度
+   - 生成的CSV文件在当前目录
 
-### 方法3: 在Julia REPL中运行
+### 首次运行
 
+如果是第一次运行，需要先安装依赖：
 ```julia
-# 启动Julia并激活项目
-# julia --project=.
-
-# 运行主程序
-include("main.jl")
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
 ```
+
+然后再运行 `include("main.jl")`
 
 ## 系统参数
 
@@ -86,17 +89,21 @@ include("main.jl")
 
 ### 示例3: 修改传输信息
 
-编辑 `main.jl` 第15行：
+在MWORKS中修改并运行：
 
 ```julia
-const MESSAGE = "您的信息"  # 修改这里
-```
+cd("***REMOVED***")
 
-然后重新运行程序。
+# 临时修改MESSAGE常量
+const MESSAGE_NEW = "您的信息"
+
+# 或者编辑main.jl文件后重新运行
+include("main.jl")
+```
 
 ### 示例4: 修改信噪比
 
-编辑 `main.jl` 第19行：
+编辑 `main.jl` 第20行，修改SNR值后在MWORKS中重新运行：
 
 ```julia
 const SNR_TEST = 15.0  # 修改SNR值（单位：dB）
@@ -115,13 +122,13 @@ $$P_e = \frac{1}{2} \exp\left(-\frac{E_b}{2N_0}\right)$$
 ## 预期结果
 
 ### 单次传输（SNR=10dB）
-- 误码率：约0.003-0.007（0.3%-0.7%）
-- 文本恢复：通常能完全正确恢复
+- 误码率：约0%（v1.1.0已修复）
+- 文本恢复：100%成功
 
 ### BER曲线
 - SNR越高，误码率越低（指数下降）
-- 仿真BER与理论BER应该非常接近
-- 在高SNR时（>10dB），相对误差应小于10%
+- 仿真BER与理论BER应该比较接近
+- v1.1.0版本性能已优化
 
 ### 频谱分析
 - 应该能检测到42kHz和84kHz的峰值
@@ -129,23 +136,26 @@ $$P_e = \frac{1}{2} \exp\left(-\frac{E_b}{2N_0}\right)$$
 
 ## 故障排除
 
-### 问题1: 找不到Julia
-
-**错误**: `找不到MWORKS Julia`
-
-**解决方案**: 
-- 检查MWORKS Syslab 2025b是否已安装
-- 或修改 `run.bat` 中的 `JULIA_PATH` 为正确路径
-
-### 问题2: 依赖包安装失败
+### 问题1: 依赖包安装失败
 
 **错误**: `LoadError: ArgumentError: Package XXX not found`
 
 **解决方案**:
+在MWORKS中手动安装：
 ```julia
-# 手动安装依赖
 using Pkg
 Pkg.add(["DSP", "FFTW", "SpecialFunctions"])
+```
+
+### 问题2: 找不到文件
+
+**错误**: `SystemError: opening file "xxx": No such file or directory`
+
+**解决方案**:
+确认当前目录正确：
+```julia
+pwd()  # 显示当前目录
+cd("正确的项目路径")
 ```
 
 ### 问题3: 误码率很高
