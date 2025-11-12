@@ -1,4 +1,4 @@
-# 2FSK调制解调系统 - 图形界面快速指南
+﻿# 2FSK调制解调系统 - 图形界面快速指南
 
 ## 📊 两种运行模式
 
@@ -18,7 +18,7 @@
 ### 适合：日常使用、快速验证
 
 ```julia
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 include("main.jl")
 ```
 
@@ -39,7 +39,7 @@ include("main.jl")
 
 ```julia
 # 1. 切换到项目目录
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 
 # 2. 运行安装脚本
 include("install_pyplot.jl")
@@ -50,7 +50,7 @@ include("install_pyplot.jl")
 ### 步骤2：运行图形版本
 
 ```julia
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 include("main_gui.jl")
 ```
 
@@ -75,7 +75,7 @@ include("main_gui.jl")
 
 ```julia
 # 1. 切换目录
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 
 # 2. 安装依赖（首次）
 using Pkg
@@ -90,7 +90,7 @@ include("main.jl")
 
 ```julia
 # 1. 切换目录
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 
 # 2. 安装基础依赖（首次）
 using Pkg
@@ -254,7 +254,7 @@ ERROR: LoadError: could not open file "src/xxx.jl"
 **解决**：确保在正确目录
 ```julia
 pwd()  # 检查当前目录
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 ```
 
 ### 6. 包版本冲突

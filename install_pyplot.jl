@@ -1,4 +1,4 @@
-"""
+﻿"""
 install_pyplot.jl - PyPlot包安装脚本
 在MWORKS环境中安装PyPlot图形库
 """

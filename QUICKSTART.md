@@ -1,4 +1,4 @@
-# 2FSK调制解调系统 - 快速开始指南
+﻿# 2FSK调制解调系统 - 快速开始指南
 
 ## 系统要求
 
@@ -18,7 +18,7 @@
 
 2. **安装图形库**：
    ```julia
-   cd("***REMOVED***")
+   cd("<PROJECT_ROOT>/2FSK_System")
    include("install_pyplot.jl")
    ```
 
@@ -31,7 +31,7 @@
 
 ```julia
 # 1. 切换到项目目录
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 
 # 2. 运行主程序
 include("main.jl")
@@ -113,7 +113,7 @@ include("../main_no_gui_backup.jl")
 在MWORKS中修改并运行：
 
 ```julia
-cd("***REMOVED***")
+cd("<PROJECT_ROOT>/2FSK_System")
 
 # 临时修改MESSAGE常量
 const MESSAGE_NEW = "您的信息"

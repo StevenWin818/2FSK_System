@@ -1,10 +1,14 @@
-# 2FSK调制解调系统
+﻿# 2FSK调制解调系统
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/yourusername/2FSK_System)
+[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](https://github.com/yourusername/2FSK_System)
 [![Julia](https://img.shields.io/badge/Julia-1.6+-purple.svg)](https://julialang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> **✨ v1.1.0 重大更新**: 解调算法完全重写，系统从失败到成功的重大突破！误码率从70%降至0%，文本恢复率100%！
+> **✨ v1.3.1 更新**: 移除所有隐私信息，使用通用路径占位符，项目更安全！
+
+> **✨ v1.3.0 重大更新**: 交互式图窗功能完全可用，无冻结问题！
+
+> **✨ v1.1.0 突破性更新**: 解调算法完全重写，系统从失败到成功的重大突破！误码率从70%降至0%，文本恢复率100%！
 
 ## 项目简介
 
@@ -57,12 +61,20 @@
 - **MWORKS Syslab 2025b** 或更高版本（内置Julia 1.9.3）
 - 依赖包：DSP, FFTW, SpecialFunctions, Statistics, PyPlot（自动安装）
 
+### 路径配置
+
+⚠️ **重要**：本项目使用通用路径占位符 `<PROJECT_ROOT>`，首次使用前请：
+1. 将项目解压到您的目标目录，例如：`D:/Projects/2FSK_System`
+2. 在代码中将 `<PROJECT_ROOT>` 替换为实际路径，或直接在REPL中设置工作目录
+
+详见 [SETUP.md](SETUP.md)
+
 ### 运行程序
 
 **首次运行（安装PyPlot）**：
 ```julia
-# 1. 切换到项目目录
-cd("***REMOVED***")
+# 1. 切换到项目目录（请修改为您的实际路径）
+cd("D:/Projects/2FSK_System")  # 修改此路径！
 
 # 2. 安装PyPlot图形库（只需运行一次）
 include("install_pyplot.jl")
@@ -70,8 +82,8 @@ include("install_pyplot.jl")
 
 **日常运行**：
 ```julia
-# 切换到项目目录
-cd("***REMOVED***")
+# 切换到项目目录（请修改为您的实际路径）
+cd("D:/Projects/2FSK_System")  # 修改此路径！
 
 # 运行主程序
 include("main.jl")
@@ -90,6 +102,7 @@ include("main.jl")
 
 - 如果PyPlot安装困难，程序会自动降级为仅生成CSV数据文件
 - 无图形版本已备份在父文件夹：`../main_no_gui_backup.jl`
+- **路径说明**：文档中的 `<PROJECT_ROOT>` 需要替换为您的实际项目路径
 
 ## 功能模块
 
