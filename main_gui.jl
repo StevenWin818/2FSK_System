@@ -23,23 +23,23 @@ using Printf
 PLOTTING_AVAILABLE = false
 try
     import PyPlot
-    # 显式导入需要的函数
-    const figure = PyPlot.figure
-    const subplot = PyPlot.subplot
-    const plot = PyPlot.plot
-    const stem = PyPlot.stem
-    const semilogy = PyPlot.semilogy
-    const title = PyPlot.title
-    const xlabel = PyPlot.xlabel
-    const ylabel = PyPlot.ylabel
-    const legend = PyPlot.legend
-    const grid = PyPlot.grid
-    const ylim = PyPlot.ylim
-    const xlim = PyPlot.xlim
-    const tight_layout = PyPlot.tight_layout
-    const savefig = PyPlot.savefig
-    const close = PyPlot.close
-    const axvline = PyPlot.axvline
+    # 显式导入需要的函数为全局变量
+    global figure = PyPlot.figure
+    global subplot = PyPlot.subplot
+    global plot = PyPlot.plot
+    global stem = PyPlot.stem
+    global semilogy = PyPlot.semilogy
+    global title = PyPlot.title
+    global xlabel = PyPlot.xlabel
+    global ylabel = PyPlot.ylabel
+    global legend = PyPlot.legend
+    global grid = PyPlot.grid
+    global ylim = PyPlot.ylim
+    global xlim = PyPlot.xlim
+    global tight_layout = PyPlot.tight_layout
+    global savefig = PyPlot.savefig
+    global close = PyPlot.close
+    global axvline = PyPlot.axvline
     
     global PLOTTING_AVAILABLE = true
     println("✓ PyPlot图形库已加载")
