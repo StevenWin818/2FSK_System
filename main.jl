@@ -25,6 +25,19 @@ PLOTTING_AVAILABLE = false
 try
     import PyPlot
     
+    # 设置GUI后端（必须在第一次绘图前设置）
+    try
+        PyPlot.matplotlib.use("TkAgg")  # 尝试使用TkAgg
+        println("✓ 使用 TkAgg 后端")
+    catch
+        try
+            PyPlot.matplotlib.use("Qt5Agg")  # 尝试Qt5
+            println("✓ 使用 Qt5Agg 后端")
+        catch
+            println("⚠ 无法设置GUI后端，将只保存PNG文件")
+        end
+    end
+    
     # 设置交互式模式
     PyPlot.ion()  # 打开交互式模式
     
