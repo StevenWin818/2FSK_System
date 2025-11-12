@@ -38,8 +38,8 @@ try
         end
     end
     
-    # 设置交互式模式
-    PyPlot.ion()  # 打开交互式模式
+    # 关闭交互式模式，使用阻塞式显示
+    PyPlot.ioff()  # 关闭交互式模式
     
     # 显式导入需要的函数为全局变量
     global figure = PyPlot.figure
@@ -56,13 +56,12 @@ try
     global xlim = PyPlot.xlim
     global tight_layout = PyPlot.tight_layout
     global savefig = PyPlot.savefig
-    global draw = PyPlot.draw
-    global pause = PyPlot.pause
+    global show = PyPlot.show
     global gcf = PyPlot.gcf
     global axvline = PyPlot.axvline
     
     global PLOTTING_AVAILABLE = true
-    println("✓ PyPlot图形库已加载（交互式模式）")
+    println("✓ PyPlot图形库已加载")
 catch e
     println("⚠ PyPlot未安装，将只生成数据文件")
     println("  安装命令: using Pkg; Pkg.add(\"PyPlot\")")
@@ -181,14 +180,12 @@ if PLOTTING_AVAILABLE
         ylim(-0.5, 1.5)
         
         tight_layout()
-        draw()  # 强制绘制
-        pause(0.5)  # 暂停让图窗完全显示
         
         # 保存图片
         output_path = joinpath(SCRIPT_DIR, "waveforms.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ 波形图已保存: $output_path")
-        println("  ✓ 图窗1已显示（可交互）")
+        println("  ✓ 图窗1已创建")
         
     catch e
         println("  ⚠ 生成波形图时出错: $e")
@@ -242,13 +239,11 @@ if PLOTTING_AVAILABLE
         legend(loc="best", prop=Dict("family"=>"SimHei", "size"=>11))
         grid(true, which="both", alpha=0.3)
         ylim(1e-6, 1)
-        draw()  # 强制绘制
-        pause(0.5)  # 暂停让图窗完全显示
         
         output_path = joinpath(SCRIPT_DIR, "ber_curve.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ BER曲线已保存: $output_path")
-        println("  ✓ 图窗2已显示（可交互）")
+        println("  ✓ 图窗2已创建")
         
     catch e
         println("  ⚠ 生成BER曲线时出错: $e")
@@ -299,13 +294,11 @@ if PLOTTING_AVAILABLE
         legend(loc="best", prop=Dict(raw"family"=>"SimHei", "size"=>11))
         grid(true, alpha=0.3)
         xlim(0, freq_limit/1000)
-        draw()  # 强制绘制
-        pause(0.5)  # 暂停让图窗完全显示
         
         output_path = joinpath(SCRIPT_DIR, "spectrum.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ 频谱图已保存: $output_path")
-        println("  ✓ 图窗3已显示（可交互）")
+        println("  ✓ 图窗3已创建")
         
     catch e
         println("  ⚠ 生成频谱图时出错: $e")
@@ -353,10 +346,22 @@ if PLOTTING_AVAILABLE
     println("  📝 数据文件:")
     println("    - ber_data.csv: 误码率数据")
     println("    - spectrum_data.csv: 频谱数据")
-    println("\n  💡 提示：3个交互式图窗已打开")
-    println("     - 可以放大、缩小、平移查看细节")
-    println("     - 图窗会保持打开状态")
-    println("     - 关闭图窗请点击窗口的X按钮")
+    
+    println("\n" * "="^60)
+    println("  💡 正在显示交互式图窗...")
+    println("     - 3个图窗将依次打开")
+    println("     - 可以缩放、平移、保存图片")
+    println("     - 关闭所有图窗后程序将退出")
+    println("="^60)
+    println()
+    
+    # 使用阻塞式显示，这样图窗会正常响应
+    try
+        show()  # 阻塞显示所有图窗，直到用户关闭
+        println("\n所有图窗已关闭")
+    catch e
+        println("\n检测到中断: ", e)
+    end
 else
     println("\n说明:")
     println("  ⚠ PyPlot未安装，仅生成了数据文件")
@@ -367,4 +372,5 @@ else
     println("    using Pkg")
     println("    Pkg.add(\"PyPlot\")")
 end
-println("="^60)
+println("\n" * "="^60)
+println("程序已退出")
