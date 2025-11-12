@@ -21,6 +21,8 @@ using Printf
 
 # 尝试加载PyPlot（全局变量，不能在try中用const）
 PLOTTING_AVAILABLE = false
+USE_MWORKS_DISPLAY = false
+
 try
     import PyPlot
     # 显式导入需要的函数为全局变量
@@ -38,11 +40,19 @@ try
     global xlim = PyPlot.xlim
     global tight_layout = PyPlot.tight_layout
     global savefig = PyPlot.savefig
+    global show = PyPlot.show
     global close = PyPlot.close
     global axvline = PyPlot.axvline
     
     global PLOTTING_AVAILABLE = true
-    println("✓ PyPlot图形库已加载")
+    
+    # 检测是否在MWORKS环境中
+    if isdefined(Main, :mworks) || isdefined(Main, :MWORKS)
+        global USE_MWORKS_DISPLAY = true
+        println("✓ PyPlot图形库已加载（MWORKS显示模式）")
+    else
+        println("✓ PyPlot图形库已加载")
+    end
 catch e
     println("⚠ PyPlot未安装，将只生成数据文件")
     println("  安装命令: using Pkg; Pkg.add(\"PyPlot\")")
@@ -161,10 +171,19 @@ if PLOTTING_AVAILABLE
         ylim(-0.5, 1.5)
         
         tight_layout()
+        
+        # 保存图片并在MWORKS中显示
         output_path = joinpath(SCRIPT_DIR, "waveforms.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ 波形图已保存: $output_path")
-        close()
+        
+        if USE_MWORKS_DISPLAY
+            show()  # 在MWORKS中显示图窗
+            println("  ✓ 图窗已在MWORKS中打开")
+        end
+        
+        # 不自动关闭，让用户可以查看
+        # close()
     catch e
         println("  ⚠ 生成波形图时出错: $e")
     end
@@ -221,7 +240,14 @@ if PLOTTING_AVAILABLE
         output_path = joinpath(SCRIPT_DIR, "ber_curve.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ BER曲线已保存: $output_path")
-        close()
+        
+        if USE_MWORKS_DISPLAY
+            show()  # 在MWORKS中显示图窗
+            println("  ✓ 图窗已在MWORKS中打开")
+        end
+        
+        # 不自动关闭，让用户可以查看
+        # close()
     catch e
         println("  ⚠ 生成BER曲线时出错: $e")
     end
@@ -275,7 +301,14 @@ if PLOTTING_AVAILABLE
         output_path = joinpath(SCRIPT_DIR, "spectrum.png")
         savefig(output_path, dpi=150, bbox_inches="tight")
         println("  ✓ 频谱图已保存: $output_path")
-        close()
+        
+        if USE_MWORKS_DISPLAY
+            show()  # 在MWORKS中显示图窗
+            println("  ✓ 图窗已在MWORKS中打开")
+        end
+        
+        # 不自动关闭，让用户可以查看
+        # close()
     catch e
         println("  ⚠ 生成频谱图时出错: $e")
     end
@@ -322,6 +355,11 @@ if PLOTTING_AVAILABLE
     println("  📝 数据文件:")
     println("    - ber_data.csv: 误码率数据")
     println("    - spectrum_data.csv: 频谱数据")
+    
+    if USE_MWORKS_DISPLAY
+        println("\n  💡 提示：图形已在MWORKS窗口中打开")
+        println("     可以放大、缩小、保存等操作")
+    end
 else
     println("\n说明:")
     println("  ⚠ PyPlot未安装，仅生成了数据文件")
